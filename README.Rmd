@@ -1,4 +1,13 @@
-####THE BEGINNING####
+#### ALL THESE FILES SHOULD BE IN THE SAME DIRECTORY BEFORE BEGINNING
+# 1.LAB_NEN_ODN.clean_BI.ann.3mbChr5.vcf.gz
+# 2.C_excelsa_V5_braker2_wRseq.gff3
+# 3.1-2-1_hits_all_gene_descriptions.tsv
+# 4.retrive_IDs.py
+# 5.convert_outliersto_bed.py
+# 6.filtering_candidates.py
+
+
+#### THE BEGINNING ####
 
 # Code relating to bash will be put as comments in this markdown document because of 
 # errors with knitting. Following everything in the markdown will produce the exact same
