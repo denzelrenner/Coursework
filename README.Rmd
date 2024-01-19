@@ -9,9 +9,8 @@
 
 #### THE BEGINNING ####
 
-# Code relating to bash will be put as comments in this markdown document because of 
-# errors with knitting. Following everything in the markdown will produce the exact same
-# results as in the word document unless stated otherwise in specific cases.
+# Following everything in the markdown will produce the exact same
+# results as in the word document except with the map plotting.
 # bash commands are not commented out and are not in code chunks either
 
 #### First make a copy of the vcf.gz file because after we gunzip it becomes a vcf 
