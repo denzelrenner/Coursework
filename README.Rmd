@@ -140,10 +140,10 @@ python3 retrive_IDs.py -i 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf' -j 'LAB','
 
 
 ## For LAB-NENT contrasts
-/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'NEN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_NENT_output/LABvNENT_WIN5K'
+/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'NEN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_NENT_output/LABvNENT_WIN5K'
 
 ## For LAB_ODN contrasts
-/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'ODN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_ODN_output/LABvODN_WIN5K'
+/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'ODN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_ODN_output/LABvODN_WIN5K'
 
 
 ## Now we use another python script to run some R code for us.
