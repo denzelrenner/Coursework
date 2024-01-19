@@ -5,12 +5,12 @@
 # results as in the word document unless stated otherwise in specific cases.
 # bash commands are not commented out and are not in code chunks either
 
-#### First make a copy of this file because after we gunzip it becomes a vcf 
-### Then lets use gunzip on the copied file, we will come back to the original later
+#### First make a copy of the vcf.gz file because after we gunzip it becomes a vcf 
+### Then lets use gunzip on the copy file, we will come back to the original later
 ### We will leave bash for a bit and get to some R.
 
 
-cp './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf.gz' './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz'
+cp './LAB_NEN_ODN.clean_BI.ann.3mbChr5.vcf.gz' './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf.gz'
 
 gunzip './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf.gz'
 
