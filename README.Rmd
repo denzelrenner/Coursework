@@ -231,7 +231,7 @@ conda deactivate
 
 
 
-####IDENTIFYING HOMOLOGS####
+#### IDENTIFYING HOMOLOGS ####
 
 ## We can now use our filtering candidates.py script to find our homologs using the overlapped bed
 ## files that we just created 
@@ -246,7 +246,7 @@ python3 filtering_candidates.py -i 'LAB_ODN_output/LABvODN_WIN5K_gffoverlapped.b
 
 
 
-####CHECKING THE TAIR DATABASE FOR FUNCTION####
+#### CHECKING THE TAIR DATABASE FOR FUNCTION ####
 
 ## We want to get a better look at the homologs that have to do with metal so we will
 ## look for that word in both homolog files. We will also want to look for candidates of selective 
