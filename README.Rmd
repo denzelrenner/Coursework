@@ -1,0 +1,265 @@
+####THE BEGINNING####
+
+# Code relating to bash will be put as comments in this markdown document because of 
+# errors with knitting. Following everything in the markdown will produce the exact same
+# results as in the word document unless stated otherwise in specific cases.
+# bash commands are not commented out and are not in code chunks either
+
+#### First make a copy of this file because after we gunzip it becomes a vcf 
+### Then lets use gunzip on the copied file, we will come back to the original later
+### We will leave bash for a bit and get to some R.
+
+
+cp './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf.gz' './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz'
+
+gunzip './LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf.gz'
+
+
+#### PCA PLOTS/POPULATION STRUCTURE AND GENETIC STRUCTURE ####
+
+## First let us sense check our data and have a look at how populations cluster
+
+```{r pca,include=TRUE,echo=TRUE}
+# Required packages
+library(vcfR)
+library(pegas)
+library(StAMPP)
+library(ade4)
+library(MASS)
+library(adegenet)
+library(adegraphics)
+
+#### Importing SNP data ####
+vcf <- read.vcfR("LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf") 
+
+# Extract genotype from vcf object
+genotypes <- extract.gt(vcf) #Unused
+
+# Get sample IDs
+sample_ID <- addID(vcf) #Unused
+
+# Conversion to a genlight object
+vcf_gen <- vcfR2genlight(vcf)
+
+#Set the population values. Important for colouring PC axes. Using indexes to get only the first three charas 
+pop(vcf_gen) <- substr(indNames(vcf_gen),1,3) 
+
+#Check it out
+pop(vcf_gen)
+
+#### Look at some of the object's information ####
+
+# Get ploidy for each sample. It is diploid
+ploidy(vcf_gen)
+
+# Get names for all samples. They look correct
+indNames(vcf_gen)
+
+# Check that positions match the actual vcf. It looks like it does
+position(vcf_gen)
+
+#### Run PCA ####
+
+# create pc object, nf is number of pc axis
+pca_object <- glPca(vcf_gen,nf=6)
+
+# View distribution of samples along pc axes, and eigenvlaues as well, move eigen values out of thr way
+scatter(pca_object,ratio = .2,posi = 'bottomright')
+
+#Shows how much each poisition contributes to a given pc axis, default is first axis
+loadingplot(pca_object)
+
+# Get eigen values for first 2 axis
+
+#PC1
+pca_object$eig[1]/sum(pca_object$eig) #23.3%
+#PC2
+pca_object$eig[2]/sum(pca_object$eig) # 7.7%
+
+
+?s.class
+# Coloured by groups. Three colours given as vector. Dots represent each distinct population
+plot1 <- s.class(pca_object$scores, pop(vcf_gen),  xax=1, yax=2, col=colors()[c(131,133,139)], 
+        # change the type of point used to draw the individuals in each pop using ppoints.pch
+        ellipseSize=0, starSize=0, ppoints.cex=1, paxes.draw=T, pgrid.draw =F,ppoints.pch=c(25,22,19)
+        # add the proprtion of variance to each axis and draw a legend at the bottom left corner
+        ,xlab='PC1 (23.3%)',ylab='PC2 (7.7%)',plegend.drawKey=T,plegend.size=0.8) 
+
+# OG PCA plot similar to the output from scatter
+plot2 <- s.label(pca_object$scores, xax=1, yax=2, ppoints.col = c("orange3"), 
+                 plabels = list(box = list(draw = FALSE),optim = TRUE), paxes.draw=T, pgrid.draw =F, 
+                 # add proportion of variance to each acis 
+                 plabels.cex=1, plot = FALSE,xlab='PC1 (23.3%)',ylab='PC2 (7.7%)')
+
+#start graphics driver
+pdf('final_pcaplot.pdf',width=15,height=8)
+
+#plot
+ADEgS(c(plot1,plot2), layout = c(1, 2))
+
+#'save' plot
+dev.off()
+
+
+
+```
+
+## Now let us create a map showing the distribution of our populations
+## We will use the google maps data we were given, and plot the populations on a map of the uk created here in R! 
+
+# NOTE THIS CODE FOR MAPS WILL NOT GIVE YOU ANY OUTPUT BECAUSE I HAVE REMOVED CERTAIN VALUES DUE TO 
+# MY INTERPRETATION OF THE CONFIDENTIALITY STATEMENT AT THE BEGINNING OF THE COURSEWORK. 
+# THE VALUES I REMOVED HAVE TO DO WITH
+# THE EXACT LONGITUDE AND LATITUDE VALUES I TOOK FROM THE GOOGLE MAP LINK WE WERE GIVEN. IF YOU WOULD
+# LIKE TO RECREATE THE PLOT IN THE WORD DOCUMENT THEN YOU WILL NEED TO USE THE GOOGLE MAP LINK, CLCIK 
+# ON EACH ICON RELATING TO ONE OF THE 3 POPULATIONS, AND READ THE GOOGLE SEARCH BAR TO GET THE EXACT 
+# LATITUDE AND LONGITUDE VALUES I USED. I HAVE WRITTEN IN THE SCRIPT HOW AND WHERE YOU WILL NEED TO
+# PUT THOSE VALUES IN
+
+
+```{r maps,include=FALSE,echo=FALSE}
+
+#install and library packages
+#install.packages("devtools") #you probably wont need devtools, but sometimes useful if ggmap wont install
+#install.packages("ggmap")
+#install.packages("mapproj")
+#install.packages("tidyverse")
+
+library(tidyverse)
+library(ggmap)
+library(mapproj)
+
+# define latitude and longitude of all the populations
+## READ IMPORTANT, PUT LAT AND LONG FOR EACH POPULATION IN THE CHARACTER VECTOR BELOW
+## IN THE ORDER OF THEIR POPULATION NAMES
+lats <- c('LAT1','LAT2','LAT3')
+longs <- c('LONG1','LONG2','LONG3')
+pop_names <- c('LAB','NENT','ODN')
+
+# create a df with all the values inside of it
+c_pyro_pops <- as.data.frame(cbind(lats,longs))
+
+# put UK in an object
+uk <- ("UK")
+
+# create a map with the uk in it
+uk_map <- map_data("world", region = uk)
+
+# plot the uk with our populations
+
+
+map_of_pops <- ggplot(uk_map, aes(x=long, y=lat, group=group))+
+  geom_polygon(fill="lightgrey", colour="black")+ # creates polygons associated with uk
+  geom_point(aes(y=lats, x=longs, group=NULL),data=c_pyro_pops, # add points for samples in geom_point
+             size=2.5, pch = 25, fill = "black", alpha = 1)+ # and make them look nice, still inside geom_point:
+  # pch=25 gives you triangular points, alpha changes the transparency of the points 
+  xlim(-9,3)+ylim(49,59)+ # adds plot limits to refine area
+  xlab("Longitude") + ylab("Latitude") +
+  theme(panel.background=element_blank())+ # removes background
+  theme(legend.position="none") + # removes legend
+  geom_segment(data=c_pyro_pops,aes(group=NULL,x=longs, y=lats,                                   xend=c(-4.8,0.2,-2.9),yend=c(53,55.6,50),color=pop_names), #set where the arrows heads point to
+               arrow = arrow(length = unit(0.1, "inches")), size = 1) +
+  # draw textboxes
+  annotate("rect", xmin = -5.8, xmax = -4.8, ymin = 52.5, ymax = 53.5, fill = "white",colour='black') + 
+  annotate("rect", xmin = 0.2, xmax = 1.3, ymin = 55.3, ymax = 56.3, fill = "white",colour='black') +
+  annotate("rect", xmin = -3.4, xmax = -2.4, ymin = 49, ymax = 50, fill = "white",colour='black') +
+  # add our populations names to specific text boxes
+  geom_text(data=c_pyro_pops,aes(x=c(-5.3,0.8,-2.9), y=c(53,55.8,49.5), group=NULL,label=pop_names)) 
+  
+
+#save pciture
+ggsave('population_map.png',plot=map_of_pops)
+```
+
+
+
+
+
+#### CALCULATING FST/SELECTION SCAN ####
+
+## Next we are now going to use our original vcf.gz file
+## But before that we need to get all the population names so we will use the retrieve_IDs.py script in the terminal
+
+
+python3 retrive_IDs.py -i 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy.vcf' -j 'LAB','NEN','ODN'
+
+## Great now lets use vcf tools to get our fst files for each contrast 
+## Replace the path to vcftools with whichever path you have
+## We will also create new directories for each contrast
+
+
+## For LAB-NENT contrasts
+/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'NEN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_NENT_output/LABvNENT_WIN5K'
+
+## For LAB_ODN contrasts
+/Users/home/miniconda3/bin/vcftools --gzvcf 'LAB_NEN_ODN.clean_BI.ann.3mbChr5_copy2.vcf.gz' --max-missing 0.8 --maf 0.05 --weir-fst-pop 'LAB_population.txt' --weir-fst-pop 'ODN_population.txt' --fst-window-size 5000 --fst-window-step 5000 --out 'LAB_ODN_output/LABvODN_WIN5K'
+
+
+## Now we use another python script to run some R code for us.
+## The convert_outliersto_bed.py script will find our top1% of outliers and print
+## a plot of their distribution.They will then be converted to bed format
+## This file takes the fst files we just created as input
+
+
+## For LAB-NENT contrast
+
+python3 convert_outliersto_bed.py -i 'LAB_NENT_output/LABvNENT_WIN5K.weir.fst' -obed 'LAB_NENT_output/LABvNENT_WIN5K_nooverlap.bed' -oimg 'LAB_NENT_output/LABvNENT_fstplot.png'
+
+## For LAB-ODN contrast
+
+python3 convert_outliersto_bed.py -i 'LAB_ODN_output/LABvODN_WIN5K.weir.fst' -obed 'LAB_ODN_output/LABvODN_WIN5K_nooverlap.bed' -oimg 'LAB_ODN_output/LABvODN_fstplot.png'
+
+
+
+
+#### IDENTIFYING GENE NAMES/INTERESECT BEDTOOLS ####
+
+## Now we interset each of our bed files with the gff using bedtools to find our gene names
+
+conda init 
+
+conda activate bedtools
+
+## LAB-NENT contrast
+bedtools intersect -a 'C_excelsa_V5_braker2_wRseq.gff3' -b 'LAB_NENT_output/LABvNENT_WIN5K_nooverlap.bed' -wb > 'LAB_NENT_output/LABvNENT_WIN5K_gffoverlapped.bed'
+
+## LAB-ODN contrast
+bedtools intersect -a 'C_excelsa_V5_braker2_wRseq.gff3' -b 'LAB_ODN_output/LABvODN_WIN5K_nooverlap.bed' -wb > 'LAB_ODN_output/LABvODN_WIN5K_gffoverlapped.bed'
+
+conda deactivate 
+
+
+
+
+####IDENTIFYING HOMOLOGS####
+
+## We can now use our filtering candidates.py script to find our homologs using the overlapped bed
+## files that we just created 
+
+## LAB-NENT contrast
+python3 filtering_candidates.py -i 'LAB_NENT_output/LABvNENT_WIN5K_gffoverlapped.bed' -g '1-2-1_hits_all_gene_descriptions.tsv' -o 'LAB_NENT_output/labvsnent_homologs.txt'
+
+## LAB-ODN contrast
+python3 filtering_candidates.py -i 'LAB_ODN_output/LABvODN_WIN5K_gffoverlapped.bed' -g '1-2-1_hits_all_gene_descriptions.tsv' -o 'LAB_ODN_output/labvsodn_homologs.txt'
+
+
+
+
+
+####CHECKING THE TAIR DATABASE FOR FUNCTION####
+
+## We want to get a better look at the homologs that have to do with metal so we will
+## look for that word in both homolog files. We will also want to look for candidates of selective 
+## sweep that are shared between ODN and NENT
+
+
+## Look for metal related genes in NENT
+grep 'metal' 'LAB_NENT_output/labvsnent_homologs.txt'
+
+## Look for metal related genes in ODN
+grep 'metal' 'LAB_ODN_output/labvsodn_homologs.txt'
+
+## Check for common genes between files
+comm -12 'LAB_ODN_output/labvsodn_homologs.txt' 'LAB_NENT_output/labvsnent_homologs.txt'
+
+
